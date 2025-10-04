@@ -1,8 +1,4 @@
-<p align="center">
-  <img src="https://img.shields.io/badge/Location-Kuwait-FF00FF?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Blog-sala.company-yellowgreen?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/Projects-go.sala.company-00d9ff?style=for-the-badge" />
-</p>
+
 
 🚀🚀🚀🚀🚀
 
