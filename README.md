@@ -1,10 +1,3 @@
-<!-- 🚀 Welcome Banner -->
-<p align="center">
-  <img src="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif" width="60" />
-  <span style="color:#FF00FF; font-size:24px;"><b>Welcome to Jamal's Web Zone!</b></span>
-  <img src="https://media.giphy.com/media/l0Exk8EUzSLsrErEQ/giphy.gif" width="60"/>
-</p>
-
 <p align="center">
   <img src="https://img.shields.io/badge/Location-Kuwait-FF00FF?style=for-the-badge" />
   <img src="https://img.shields.io/badge/Blog-sala.company-yellowgreen?style=for-the-badge" />
@@ -17,8 +10,8 @@
 
 🌟 **Jamal Al Mutawa** — web developer & digital explorer from Kuwait!
 
-- 🛠️ **Projects Gallery:** [go.sala.company](https://go.sala.company)
-- 📚 **eBook Store & Blog:** [sala.company](https://sala.company)
+- 🛠️ **Projects Gallery:** [https://go.sala.company/](https://go.sala.company/)
+- 📚 **eBook Store & Blog:** [https://sala.company/](https://sala.company/)
 - 🤖 **Interests:** AI, automation, web nostalgia, creative hacking
 
 🚀🚀🚀🚀🚀
@@ -40,7 +33,7 @@
 ## 📰 From Sala.Company
 
 - ✍️ Modern tech articles, ebooks, productivity tips
-- ⚡ Demos & apps: [go.sala.company](https://go.sala.company), [sala.company](https://sala.company)
+- ⚡ Demos & apps: [https://go.sala.company/](https://go.sala.company/), [https://sala.company/](https://sala.company/)
 
 🚀🚀🚀🚀🚀
 
