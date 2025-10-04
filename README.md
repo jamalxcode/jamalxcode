@@ -14,7 +14,7 @@
 
 ## 🏆 Featured Projects
 
-| [Breakout Game](https://breakout.sala.company) | [Galactic Defender](https://galacticdefender.sala.company) | [AI Presentations](https://webai.sala.company) | [Understand AI](https://understand.sala.company) |
+| [Breakout Game](https://breakout.sala.company) | [Galactic Defender](https://galacticdefender.sala.company) | [AI Chatbot](https://webai.sala.company) | [Understand AI](https://understand.sala.company) |
 | --- | --- | --- | --- |
 
 🚀🚀🚀🚀🚀
