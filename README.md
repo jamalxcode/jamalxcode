@@ -4,7 +4,7 @@
 
 ## About Me
 
-🌟 **Jamal Al Mutawa** — web developer & digital explorer from Kuwait!
+🌟 **Jamal Faisal Almutawa** — web developer & digital explorer from Kuwait!
 
 - 🛠️ **Projects Gallery:** [https://go.sala.company/](https://go.sala.company/)
 - 📚 **eBook Store & Blog:** [https://sala.company/](https://sala.company/)
