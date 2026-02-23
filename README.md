@@ -8,6 +8,7 @@ Building browser-based games, AI experiments, and creative tools at [sala.compan
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/jamal-al-mutawa/)
 [![X](https://img.shields.io/badge/X-000000?style=flat&logo=x&logoColor=white)](https://x.com/jamalmutawa)
+[![Substack](https://img.shields.io/badge/Substack-FF6719?style=flat&logo=substack&logoColor=white)](https://mutawa.substack.com)
 [![Website](https://img.shields.io/badge/sala.company-111827?style=flat&logo=safari&logoColor=white)](https://www.sala.company)
 
 </div>
@@ -41,6 +42,12 @@ Building browser-based games, AI experiments, and creative tools at [sala.compan
 | Project | Repo | Description |
 |---------|------|-------------|
 | [How AI Works](https://understand.sala.company) | [Gamma](https://gamma.app) | Visual explainer covering neural networks and language models |
+
+---
+
+## Writing
+
+**[Early Wake Up Club](https://mutawa.substack.com)** — Newsletter covering technology, business, and AI. Topics include crypto, the AI chip race, and big tech.
 
 ---
 
