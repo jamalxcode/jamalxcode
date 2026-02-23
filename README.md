@@ -40,7 +40,7 @@ Building browser-based games, AI experiments, and creative tools at [sala.compan
 ### Learn
 | Project | Repo | Description |
 |---------|------|-------------|
-| [How AI Works](https://understand.sala.company) | — | Visual explainer covering neural networks and language models |
+| [How AI Works](https://understand.sala.company) | [Gamma](https://gamma.app) | Visual explainer covering neural networks and language models |
 
 ---
 
