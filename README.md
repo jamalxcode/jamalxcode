@@ -16,31 +16,31 @@ Building browser-based games, AI experiments, and creative tools at [sala.compan
 
 ## Featured Project
 
-**[WebAI — Private Browser AI](https://webai.sala.company)** — Run a local AI model entirely in your browser. No servers, no APIs, no data leaving your device.
+**[WebAI — Private Browser AI](https://webai.sala.company)** — [[repo]](https://github.com/jamalxcode/webllm-onefile) Run a local AI model entirely in your browser. No servers, no APIs, no data leaving your device.
 
 ---
 
 ## Projects at sala.company
 
 ### Games
-| Project | Description |
-|---------|-------------|
-| [AI Coded Breakout](https://breakout.sala.company) | Classic arcade Breakout built with AI-generated code |
-| [Galactic Defender](https://galacticdefender.sala.company) | Galaga-inspired space shooter |
-| [AI Coded Tetris](https://tetris.sala.company) | Tetris, reprogrammed using AI |
-| [3D Rubik's Cube](https://cube.sala.company) | Interactive 3D puzzle — React + Three.js |
+| Project | Repo | Description |
+|---------|------|-------------|
+| [AI Coded Breakout](https://breakout.sala.company) | [repo](https://github.com/jamalxcode/breakout-game-html) | Classic arcade Breakout built with AI-generated code |
+| [Galactic Defender](https://galacticdefender.sala.company) | [repo](https://github.com/jamalxcode/galactic_defender) | Galaga-inspired space shooter |
+| [AI Coded Tetris](https://tetris.sala.company) | [repo](https://github.com/jamalxcode/tetris3) | Tetris, reprogrammed using AI |
+| [3D Rubik's Cube](https://cube.sala.company) | [repo](https://github.com/jamalxcode/cube) | Interactive 3D puzzle — React + Three.js |
 
 ### Tools
-| Project | Description |
-|---------|-------------|
-| [AI Tools Collection](https://ai.sala.company) | Curated directory of AI websites and experiments |
-| [Secret Emoji Messenger](https://secret.sala.company) | Hide secret messages inside emojis using Unicode steganography |
-| [iPod Classic Player](https://music.sala.company) | Retro browser-based MP3 player |
+| Project | Repo | Description |
+|---------|------|-------------|
+| [AI Tools Collection](https://ai.sala.company) | [repo](https://github.com/jamalxcode/ai-sala-company) | Curated directory of AI websites and experiments |
+| [Secret Emoji Messenger](https://secret.sala.company) | [repo](https://github.com/jamalxcode/hidetext) | Hide secret messages inside emojis using Unicode steganography |
+| [iPod Classic Player](https://music.sala.company) | [repo](https://github.com/jamalxcode/retro-tunes-player) | Retro browser-based MP3 player |
 
 ### Learn
-| Project | Description |
-|---------|-------------|
-| [How AI Works](https://understand.sala.company) | Visual explainer covering neural networks and language models |
+| Project | Repo | Description |
+|---------|------|-------------|
+| [How AI Works](https://understand.sala.company) | — | Visual explainer covering neural networks and language models |
 
 ---
 
