@@ -50,6 +50,11 @@ Building browser-based games, AI experiments, and creative tools at [sala.compan
 
 **[Early Wake Up Club](https://mutawa.substack.com)** — Newsletter covering technology, business, and AI. Topics include crypto, the AI chip race, and big tech.
 
+Recent articles:
+- [The Trillion Dollar Club](https://mutawa.substack.com/p/the-trillion-dollar-club) — Jan 2026
+- [From Mining Bitcoin to Powering ChatGPT: The Great Crypto Pivot](https://mutawa.substack.com/p/from-mining-bitcoin-to-powering-chatgpt) — Dec 2025
+- [The Great AI Chip War: How China and America Are Fighting for the Future](https://mutawa.substack.com/p/the-great-ai-chip-war-how-china-and) — Nov 2025
+
 ---
 
 ## Tech
