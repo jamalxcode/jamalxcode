@@ -42,6 +42,7 @@ Building browser-based games, AI experiments, and creative tools at [sala.compan
 | Project | Repo | Description |
 |---------|------|-------------|
 | [How AI Works](https://understand.sala.company) | [Gamma](https://gamma.app) | Visual explainer covering neural networks and language models |
+| [Early Wake Up Club](https://mutawa.substack.com) | [Substack](https://mutawa.substack.com) | Newsletter covering technology, business, and AI |
 
 ---
 
