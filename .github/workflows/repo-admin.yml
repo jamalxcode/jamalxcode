@@ -1,0 +1,96 @@
+# Repo admin jobs that Claude cloud sessions can't do directly (their proxy blocks
+# repo creation and the Pages settings API). A session triggers this with
+# workflow_dispatch; it runs on GitHub's side with the ADMIN_TOKEN secret.
+#
+# ADMIN_TOKEN: fine-grained personal access token, resource owner jamalxcode,
+# "All repositories", permissions Administration, Contents, Pages and Workflows
+# set to read and write.
+name: Repo admin
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: create-repo | pages | domain | site (= all three) | settings
+        required: true
+        default: site
+      repo:
+        description: Repository name, without owner
+        required: true
+      domain:
+        description: Custom domain, e.g. foo.sala.company (pages/domain/site)
+        required: false
+      private:
+        description: Create the repo as private (create-repo/site)
+        required: false
+        default: 'false'
+      description:
+        description: Repo description (optional, any task)
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repo-admin-${{ inputs.repo }}
+  cancel-in-progress: false
+
+jobs:
+  admin:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+      OWNER: ${{ github.repository_owner }}
+      TASK: ${{ inputs.task }}
+      REPO: ${{ inputs.repo }}
+      DOMAIN: ${{ inputs.domain }}
+      PRIVATE: ${{ inputs.private }}
+      DESCRIPTION: ${{ inputs.description }}
+    steps:
+      - name: Check inputs and token
+        run: |
+          [ -n "$GH_TOKEN" ] || { echo "::error::ADMIN_TOKEN secret is not set"; exit 1; }
+          [[ "$REPO" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::bad repo name: $REPO"; exit 1; }
+          [[ -z "$DOMAIN" || "$DOMAIN" =~ ^[A-Za-z0-9.-]+$ ]] || { echo "::error::bad domain: $DOMAIN"; exit 1; }
+          case "$TASK" in create-repo|pages|domain|site|settings) ;; *) echo "::error::unknown task: $TASK"; exit 1;; esac
+          gh api user --jq '"token belongs to " + .login'
+
+      - name: Create repository
+        if: inputs.task == 'create-repo' || inputs.task == 'site'
+        run: |
+          if gh api "repos/$OWNER/$REPO" --silent 2>/dev/null; then
+            echo "$OWNER/$REPO already exists"
+          else
+            gh api user/repos -f name="$REPO" -F private="$PRIVATE" -F auto_init=true -f description="$DESCRIPTION" --jq '"created " + .html_url'
+          fi
+
+      - name: Enable Pages (source = GitHub Actions)
+        if: inputs.task == 'pages' || inputs.task == 'site'
+        run: |
+          if gh api "repos/$OWNER/$REPO/pages" --silent 2>/dev/null; then
+            gh api -X PUT "repos/$OWNER/$REPO/pages" -f build_type=workflow
+          else
+            gh api -X POST "repos/$OWNER/$REPO/pages" -f build_type=workflow --silent
+          fi
+          gh api "repos/$OWNER/$REPO/pages" --jq '"pages: " + .build_type + " " + .html_url'
+
+      - name: Set custom domain and enforce HTTPS
+        if: inputs.domain != '' && (inputs.task == 'domain' || inputs.task == 'pages' || inputs.task == 'site')
+        run: |
+          gh api -X PUT "repos/$OWNER/$REPO/pages" -f cname="$DOMAIN"
+          # The certificate is issued only after DNS resolves, so HTTPS can take a few minutes.
+          for i in $(seq 1 20); do
+            if gh api -X PUT "repos/$OWNER/$REPO/pages" -F https_enforced=true --silent 2>/dev/null; then
+              echo "HTTPS enforced"; break
+            fi
+            echo "certificate not ready yet ($i/20)"; sleep 30
+          done
+          gh api "repos/$OWNER/$REPO/pages" --jq '{cname, https_enforced, status, html_url}'
+
+      - name: Set description and homepage
+        if: inputs.description != '' || inputs.domain != ''
+        run: |
+          args=()
+          [ -n "$DESCRIPTION" ] && args+=(-f description="$DESCRIPTION")
+          [ -n "$DOMAIN" ] && args+=(-f homepage="https://$DOMAIN")
+          gh api -X PATCH "repos/$OWNER/$REPO" "${args[@]}" --jq '{full_name, description, homepage}'
