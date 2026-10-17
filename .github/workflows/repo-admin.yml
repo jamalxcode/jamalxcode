@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       task:
-        description: create-repo | pages | domain | site (= all three) | settings | reset-domain (remove and re-add the domain to retry a stuck HTTPS certificate)
+        description: create-repo | pages | domain | site (= all three) | settings | reset-domain (remove and re-add the domain to retry a stuck HTTPS certificate) | remove-domain (detach the custom domain; the site serves from owner.github.io/repo)
         required: true
         default: site
       repo:
@@ -52,7 +52,7 @@ jobs:
           [ -n "$GH_TOKEN" ] || { echo "::error::ADMIN_TOKEN secret is not set"; exit 1; }
           [[ "$REPO" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::bad repo name: $REPO"; exit 1; }
           [[ -z "$DOMAIN" || "$DOMAIN" =~ ^[A-Za-z0-9.-]+$ ]] || { echo "::error::bad domain: $DOMAIN"; exit 1; }
-          case "$TASK" in create-repo|pages|domain|site|settings|reset-domain) ;; *) echo "::error::unknown task: $TASK"; exit 1;; esac
+          case "$TASK" in create-repo|pages|domain|site|settings|reset-domain|remove-domain) ;; *) echo "::error::unknown task: $TASK"; exit 1;; esac
           gh api user --jq '"token belongs to " + .login'
 
       - name: Create repository
@@ -73,6 +73,13 @@ jobs:
             gh api -X POST "repos/$OWNER/$REPO/pages" -f build_type=workflow --silent
           fi
           gh api "repos/$OWNER/$REPO/pages" --jq '"pages: " + .build_type + " " + .html_url'
+
+      - name: Detach custom domain (remove-domain)
+        if: inputs.task == 'remove-domain'
+        run: |
+          echo '{"cname":null}' | gh api -X PUT "repos/$OWNER/$REPO/pages" --input - --silent
+          gh api -X PATCH "repos/$OWNER/$REPO" -f homepage="https://$OWNER.github.io/$REPO/" --silent
+          gh api "repos/$OWNER/$REPO/pages" --jq '{cname, html_url}'
 
       - name: Remove custom domain (reset-domain)
         if: inputs.task == 'reset-domain'
