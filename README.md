@@ -10,6 +10,7 @@ Browser games, AI experiments and creative tools, all showcased at **[go.sala.co
 [![X](https://img.shields.io/badge/X-000000?style=flat&logo=x&logoColor=white)](https://x.com/jamalmutawa)
 [![Substack](https://img.shields.io/badge/Substack-FF6719?style=flat&logo=substack&logoColor=white)](https://mutawa.substack.com)
 [![go.sala.company](https://img.shields.io/badge/go.sala.company-111827?style=flat&logo=safari&logoColor=white)](https://go.sala.company)
+[![eBooks](https://img.shields.io/badge/eBooks-sala.company-7AB55C?style=flat&logo=shopify&logoColor=white)](https://www.sala.company)
 
 </div>
 
@@ -73,6 +74,8 @@ My portal, where every project I build is announced and showcased first. If you 
 ---
 
 ## Writing
+
+**[eBooks at sala.company](https://www.sala.company)** — My ebooks, sold through my online store.
 
 **[Early Wake Up Club](https://mutawa.substack.com)** — Newsletter covering technology, business, and AI. Topics include crypto, the AI chip race, and big tech.
 
