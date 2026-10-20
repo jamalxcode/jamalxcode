@@ -4,22 +4,26 @@
 
 **Coding teacher and veteran developer from Kuwait, now vibe coding for fun**
 
-Building browser-based games, AI experiments, and creative tools at [sala.company](https://www.sala.company)
+Browser games, AI experiments and creative tools, all showcased at **[go.sala.company](https://go.sala.company)**
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/jamal-al-mutawa/)
 [![X](https://img.shields.io/badge/X-000000?style=flat&logo=x&logoColor=white)](https://x.com/jamalmutawa)
 [![Substack](https://img.shields.io/badge/Substack-FF6719?style=flat&logo=substack&logoColor=white)](https://mutawa.substack.com)
-[![Website](https://img.shields.io/badge/sala.company-111827?style=flat&logo=safari&logoColor=white)](https://www.sala.company)
+[![go.sala.company](https://img.shields.io/badge/go.sala.company-111827?style=flat&logo=safari&logoColor=white)](https://go.sala.company)
 
 </div>
+
+---
+
+## Start here: [go.sala.company](https://go.sala.company)
+
+My portal, where every project I build is announced and showcased first. If you found me through my LinkedIn posts or my Substack articles, this is the place to see my actual work and what I can do. ([repo](https://github.com/jamalxcode/sala-company-start-page))
 
 ---
 
 ## Featured Project
 
 **[🔥 Heat — Market Heatmaps](https://heat.sala.company)** — [[repo]](https://github.com/jamalxcode/heat) Crypto heatmap of the top 100 coins and a forex heatmap of 48 currencies, each tile combining the price move with technical indicators. A daily scorecard checks whether its 🚀 / 😢 calls actually predicted anything.
-
-**Start here:** [go.sala.company](https://go.sala.company) ([repo](https://github.com/jamalxcode/sala-company-start-page)) — one page linking every project below. Everything is free and runs in the browser.
 
 ---
 
