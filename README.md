@@ -107,7 +107,7 @@ There are no servers: every web project is a static site on GitHub Pages, and Gi
 
 | Language | Share | Where |
 |----------|------:|-------|
-| JavaScript | 48% | Games, heatmaps and maps: Last Marine Standing, Heat, Rizq |
+| JavaScript | 48% | Games and heatmaps: Last Marine Standing, Rizq, Heat |
 | HTML | 16% | Single-file apps that need no build step |
 | TypeScript | 15% | React apps: Rubik's Cube, WebAI, Retro players |
 | CSS | 5% | Retro styling: shortwave radio, wood-panel TV |
