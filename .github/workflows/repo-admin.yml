@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       task:
-        description: create-repo | pages | domain | site (= all three) | settings | reset-domain (remove and re-add the domain to retry a stuck HTTPS certificate) | remove-domain (detach the custom domain; the site serves from owner.github.io/repo)
+        description: audit (read-only report on every repo; repo input is ignored) | create-repo | pages | domain | site (= all three) | settings | reset-domain (remove and re-add the domain to retry a stuck HTTPS certificate) | remove-domain (detach the custom domain; the site serves from owner.github.io/repo)
         required: true
         default: site
       repo:
@@ -52,8 +52,25 @@ jobs:
           [ -n "$GH_TOKEN" ] || { echo "::error::ADMIN_TOKEN secret is not set"; exit 1; }
           [[ "$REPO" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::bad repo name: $REPO"; exit 1; }
           [[ -z "$DOMAIN" || "$DOMAIN" =~ ^[A-Za-z0-9.-]+$ ]] || { echo "::error::bad domain: $DOMAIN"; exit 1; }
-          case "$TASK" in create-repo|pages|domain|site|settings|reset-domain|remove-domain) ;; *) echo "::error::unknown task: $TASK"; exit 1;; esac
+          case "$TASK" in audit|create-repo|pages|domain|site|settings|reset-domain|remove-domain) ;; *) echo "::error::unknown task: $TASK"; exit 1;; esac
           gh api user --jq '"token belongs to " + .login'
+
+      - name: Audit all repositories (read-only)
+        if: inputs.task == 'audit'
+        run: |
+          gh api --paginate "user/repos?affiliation=owner&per_page=100" \
+            --jq '.[] | [.name, (if .private then "private" else "public" end), (if .archived then "ARCHIVED" else "" end), (if .fork then "fork" else "" end), .default_branch, (.pushed_at[0:10]), (.size|tostring), (.description // "-"), (.homepage // "-"), (.topics|join(",")), (.has_pages|tostring), (.stargazers_count|tostring)] | @tsv' \
+            | sort > repos.tsv
+          echo "AUDIT name|vis|archived|fork|branch|pushed|kb|description|homepage|topics|has_pages|stars"
+          while IFS=$'\t' read -r name vis arch fork br pushed kb desc home topics pages stars; do
+            p="-"
+            if [ "$pages" = "true" ]; then
+              p=$(gh api "repos/$OWNER/$name/pages" --jq '"\(.build_type) cname=\(.cname // "-") https=\(.https_enforced) status=\(.status // "-")"' 2>/dev/null || echo "pages-error")
+            fi
+            wf=$(gh api "repos/$OWNER/$name/contents/.github/workflows?ref=$br" --jq '[.[].name]|join(",")' 2>/dev/null || echo "-")
+            files=$(gh api "repos/$OWNER/$name/contents?ref=$br" --jq '[.[].name]|join(",")' 2>/dev/null | cut -c1-300 || echo "-")
+            echo "AUDIT $name|$vis|$arch|$fork|$br|$pushed|$kb|$desc|$home|$topics|$p|$stars|wf=$wf|root=$files"
+          done < repos.tsv
 
       - name: Create repository
         if: inputs.task == 'create-repo' || inputs.task == 'site'
