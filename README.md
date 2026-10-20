@@ -2,7 +2,7 @@
 
 # Jamal Faisal Almutawa
 
-**Web developer & digital explorer from Kuwait**
+**Coding teacher and veteran developer from Kuwait, now vibe coding for fun**
 
 Building browser-based games, AI experiments, and creative tools at [sala.company](https://www.sala.company)
 
@@ -84,7 +84,9 @@ Recent articles:
 ![Built with Claude](https://img.shields.io/badge/Built_with-Claude-D97757?style=flat&logo=claude&logoColor=white)
 ![Hosted on GitHub Pages](https://img.shields.io/badge/Hosted_on-GitHub_Pages-222222?style=flat&logo=github&logoColor=white)
 
-**Almost everything here is vibe coded with Claude.** I taught coding a long time ago; Claude is what finally got me shipping. Since February 2026, Claude has co-authored **425 commits across 33 repos**, 368 of them in October 2026 alone. My earlier 2025 experiments were built with Lovable.
+I'm a professional coding teacher. I learned to code for work in Pascal, C, BASIC and COBOL, then Perl, C++, dBase and Clipper, and built custom systems for different customers before my career got busy.
+
+**Now I code for fun, and almost everything here is vibe coded with Claude.** Since February 2026, Claude has co-authored **425 commits across 33 repos**, 368 of them in October 2026 alone. My earlier 2025 experiments were built with Lovable.
 
 There are no servers: every web project is a static site on GitHub Pages, and GitHub Actions keep the news, heatmaps and weather data fresh.
 
