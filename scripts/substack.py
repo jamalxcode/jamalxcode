@@ -6,24 +6,54 @@ the README untouched.
 
 Usage: python3 scripts/substack.py [feed-file]   (a local file is for testing)
 """
+from datetime import datetime
 import email.utils
+import json
 import re
 import sys
 import urllib.request
 import xml.etree.ElementTree as ET
 
 FEED = "https://mutawa.substack.com/feed"
+ARCHIVE = "https://mutawa.substack.com/api/v1/archive?sort=new&limit=12"
+UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36",
+      "Accept": "application/rss+xml, application/json, text/xml, */*"}
 README = "README.md"
 COUNT = 5
 START, END = "<!-- SUBSTACK:START -->", "<!-- SUBSTACK:END -->"
 
 
-def read_feed(src):
-    if src:
-        return open(src, "rb").read()
-    req = urllib.request.Request(FEED, headers={"User-Agent": "Mozilla/5.0 (profile README updater)"})
-    with urllib.request.urlopen(req, timeout=30) as r:
+def get(url):
+    with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30) as r:
         return r.read()
+
+
+def from_archive():
+    """Fallback: Substack's JSON archive, used when the RSS feed is refused."""
+    out = []
+    for p in json.loads(get(ARCHIVE)):
+        if p.get("type", "newsletter") != "newsletter" or not p.get("title"):
+            continue
+        date = datetime.fromisoformat(p["post_date"].replace("Z", "+00:00"))
+        out.append((date, p["title"].strip(), p.get("canonical_url", "").split("?")[0]))
+    out.sort(reverse=True)
+    return out[:COUNT]
+
+
+def fetch_posts(src):
+    if src:
+        return posts(open(src, "rb").read())
+    errors = []
+    try:
+        return posts(get(FEED))
+    except Exception as e:
+        errors.append(f"RSS feed: {e}")
+    try:
+        return from_archive()
+    except Exception as e:
+        errors.append(f"JSON archive: {e}")
+    print("::error::Could not read Substack. " + " | ".join(errors))
+    sys.exit(1)
 
 
 def posts(xml):
@@ -43,7 +73,7 @@ def md(title):
 
 
 def main():
-    items = posts(read_feed(sys.argv[1] if len(sys.argv) > 1 else None))
+    items = fetch_posts(sys.argv[1] if len(sys.argv) > 1 else None)
     if not items:
         sys.exit("No posts found in the feed; README left unchanged.")
     lines = "\n".join(f"- [{md(t)}]({l}) — {d.strftime('%b %Y')}" for d, t, l in items)
