@@ -79,15 +79,28 @@ Recent articles:
 
 ---
 
-## Tech
+## How it's built
 
-![HTML](https://img.shields.io/badge/HTML-E34F26?style=flat&logo=html5&logoColor=white)
-![CSS](https://img.shields.io/badge/CSS-1572B6?style=flat&logo=css3&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript&logoColor=black)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)
-![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black)
-![Go](https://img.shields.io/badge/Go-00ADD8?style=flat&logo=go&logoColor=white)
-![Swift](https://img.shields.io/badge/Swift-F05138?style=flat&logo=swift&logoColor=white)
+![Built with Claude](https://img.shields.io/badge/Built_with-Claude-D97757?style=flat&logo=claude&logoColor=white)
+![Hosted on GitHub Pages](https://img.shields.io/badge/Hosted_on-GitHub_Pages-222222?style=flat&logo=github&logoColor=white)
+
+**Almost everything here is vibe coded with Claude.** I taught coding a long time ago; Claude is what finally got me shipping. Since February 2026, Claude has co-authored **425 commits across 33 repos**, 368 of them in October 2026 alone. My earlier 2025 experiments were built with Lovable.
+
+There are no servers: every web project is a static site on GitHub Pages, and GitHub Actions keep the news, heatmaps and weather data fresh.
+
+**What the code actually is** (about 85,000 lines across all my repos, measured October 2026):
+
+| Language | Share | Where |
+|----------|------:|-------|
+| JavaScript | 48% | Games, heatmaps and maps: Last Marine Standing, Heat, Meridian |
+| HTML | 16% | Single-file apps that need no build step |
+| TypeScript | 15% | React apps: Rubik's Cube, WebAI, Retro players |
+| CSS | 5% | Retro styling: shortwave radio, wood-panel TV |
+| Go | 5% | News pipeline, TikTok lyric videos, market ticker bar |
+| Shell | 5% | Bitcoin wallet toolkit, macOS ticker scripts |
+| Rainmeter | 3% | Windows desktop widgets |
+| PowerShell | 1% | Windows tray Bitcoin price and wallpaper rotator |
+| Python, Swift, YAML | 2% | Workflows, build helpers, a macOS window-layout app |
 
 ---
 
