@@ -16,6 +16,7 @@ import xml.etree.ElementTree as ET
 
 FEED = "https://mutawa.substack.com/feed"
 ARCHIVE = "https://mutawa.substack.com/api/v1/archive?sort=new&limit=12"
+RELAY = "https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fmutawa.substack.com%2Ffeed"
 UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36",
       "Accept": "application/rss+xml, application/json, text/xml, */*"}
 README = "README.md"
@@ -40,6 +41,19 @@ def from_archive():
     return out[:COUNT]
 
 
+def from_relay():
+    """Fallback: rss2json reads the same public feed when Substack blocks GitHub's servers."""
+    data = json.loads(get(RELAY))
+    if data.get("status") != "ok":
+        raise RuntimeError(data.get("message", "relay error"))
+    out = []
+    for p in data.get("items", []):
+        date = datetime.strptime(p["pubDate"], "%Y-%m-%d %H:%M:%S")
+        out.append((date, p["title"].strip(), p["link"].split("?")[0]))
+    out.sort(reverse=True)
+    return out[:COUNT]
+
+
 def fetch_posts(src):
     if src:
         return posts(open(src, "rb").read())
@@ -52,6 +66,10 @@ def fetch_posts(src):
         return from_archive()
     except Exception as e:
         errors.append(f"JSON archive: {e}")
+    try:
+        return from_relay()
+    except Exception as e:
+        errors.append(f"rss2json: {e}")
     print("::error::Could not read Substack. " + " | ".join(errors))
     sys.exit(1)
 
