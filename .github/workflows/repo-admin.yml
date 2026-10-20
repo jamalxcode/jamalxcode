@@ -59,7 +59,7 @@ jobs:
         if: inputs.task == 'audit'
         run: |
           gh api --paginate "user/repos?affiliation=owner&per_page=100" \
-            --jq '.[] | [.name, (if .private then "private" else "public" end), (if .archived then "ARCHIVED" else "" end), (if .fork then "fork" else "" end), .default_branch, (.pushed_at[0:10]), (.size|tostring), (.description // "-"), (.homepage // "-"), (.topics|join(",")), (.has_pages|tostring), (.stargazers_count|tostring)] | @tsv' \
+            --jq '.[] | [.name, (if .private then "private" else "public" end), (if .archived then "ARCHIVED" else "active" end), (if .fork then "fork" else "own" end), .default_branch, (.pushed_at[0:10]), (.size|tostring), (.description // "-"), (.homepage // "-"), (if (.topics|length)>0 then (.topics|join(",")) else "-" end), (.has_pages|tostring), (.stargazers_count|tostring)] | @tsv' \
             | sort > repos.tsv
           echo "AUDIT name|vis|archived|fork|branch|pushed|kb|description|homepage|topics|has_pages|stars"
           while IFS=$'\t' read -r name vis arch fork br pushed kb desc home topics pages stars; do
