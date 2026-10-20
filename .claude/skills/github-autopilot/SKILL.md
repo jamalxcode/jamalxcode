@@ -35,7 +35,7 @@ only ask the user for something on the "truly manual" list at the bottom.
      ref:"main", workflow_id:"repo-admin.yml",
      inputs:{task:"site", repo:"<name>", domain:"<name>.sala.company", private:"false", description:"..."}}
    ```
-   Tasks: `create-repo`, `pages` (source = GitHub Actions, plus the domain if given), `domain`, `site` (all three), `settings` (description and homepage only).
+   Tasks: `create-repo`, `pages` (source = GitHub Actions, plus the domain if given), `domain`, `site` (all three), `settings` (description and homepage only), `reset-domain`, `remove-domain`, `disable-pages`, `archive` (run `disable-pages` first: archived repos are read-only), and `audit` (read-only report on every repo; job logs are blocked here, so read it with `git fetch origin audit-report && git show FETCH_HEAD:audit.txt`).
 3. Wait for it: `gh api "repos/jamalxcode/jamalxcode/actions/runs?per_page=1" --jq '.workflow_runs[0]|"\(.status) \(.conclusion)"'`. Read the logs with `get_job_logs` if it fails.
 4. For a new repo, now `add_repo` it with push access, clone it, and push.
 
