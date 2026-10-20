@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       task:
-        description: audit (read-only report on every repo; repo input is ignored) | create-repo | pages | domain | site (= all three) | settings | reset-domain (remove and re-add the domain to retry a stuck HTTPS certificate) | remove-domain (detach the custom domain; the site serves from owner.github.io/repo)
+        description: audit (read-only report on every repo; repo input is ignored) | create-repo | pages | domain | site (= all three) | settings | reset-domain (remove and re-add the domain to retry a stuck HTTPS certificate) | disable-pages (unpublish the Pages site) | archive (make the repo read-only and archived) | remove-domain (detach the custom domain; the site serves from owner.github.io/repo)
         required: true
         default: site
       repo:
@@ -52,7 +52,7 @@ jobs:
           [ -n "$GH_TOKEN" ] || { echo "::error::ADMIN_TOKEN secret is not set"; exit 1; }
           [[ "$REPO" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::bad repo name: $REPO"; exit 1; }
           [[ -z "$DOMAIN" || "$DOMAIN" =~ ^[A-Za-z0-9.-]+$ ]] || { echo "::error::bad domain: $DOMAIN"; exit 1; }
-          case "$TASK" in audit|create-repo|pages|domain|site|settings|reset-domain|remove-domain) ;; *) echo "::error::unknown task: $TASK"; exit 1;; esac
+          case "$TASK" in audit|create-repo|pages|domain|site|settings|reset-domain|remove-domain|disable-pages|archive) ;; *) echo "::error::unknown task: $TASK"; exit 1;; esac
           gh api user --jq '"token belongs to " + .login'
 
       - name: Audit all repositories (read-only)
@@ -127,6 +127,20 @@ jobs:
             echo "certificate not ready yet ($i/20)"; sleep 30
           done
           gh api "repos/$OWNER/$REPO/pages" --jq '{cname, https_enforced, status, html_url}'
+
+      - name: Unpublish the Pages site (disable-pages)
+        if: inputs.task == 'disable-pages'
+        run: |
+          if gh api "repos/$OWNER/$REPO/pages" --silent 2>/dev/null; then
+            gh api -X DELETE "repos/$OWNER/$REPO/pages" --silent && echo "Pages unpublished for $REPO"
+          else
+            echo "$REPO has no Pages site"
+          fi
+
+      - name: Archive repository (archive)
+        if: inputs.task == 'archive'
+        run: |
+          gh api -X PATCH "repos/$OWNER/$REPO" -F archived=true --jq '"\(.full_name) archived=\(.archived)"'
 
       - name: Set description and homepage
         if: inputs.description != '' || inputs.domain != ''
