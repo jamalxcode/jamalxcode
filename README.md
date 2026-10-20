@@ -80,11 +80,13 @@ My portal, where every project I build is announced and showcased first. If you 
 **[Early Wake Up Club](https://mutawa.substack.com)** — Newsletter covering technology, business, and AI. Topics include crypto, the AI chip race, and big tech.
 
 Recent articles:
+<!-- SUBSTACK:START -->
 - [The Nine-Day Adobe Clone: What AI-Built Software Means for Your Legacy Systems](https://mutawa.substack.com/p/nine-day-adobe-clone-ai-legacy-systems) — Oct 2026
 - [Vibe Coding, One Year Later: The Same Game, Very Different Results](https://mutawa.substack.com/p/vibe-coding-1-year-ago-to-today) — Oct 2026
 - [AI Will Not Kill You](https://mutawa.substack.com/p/ai-will-not-kill-you) — Sep 2026
 - [How Anthropic's Claude Watermark Works](https://mutawa.substack.com/p/how-anthropics-claude-watermark-works) — Aug 2026
 - [The $116 Million Coldcard Hack: Why Bitcoin's Defenders Turned to Chinese AI](https://mutawa.substack.com/p/the-116-million-coldcard-hack-why) — Aug 2026
+<!-- SUBSTACK:END -->
 
 [All articles →](https://mutawa.substack.com/archive)
 
