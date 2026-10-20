@@ -69,8 +69,16 @@ jobs:
             fi
             wf=$(gh api "repos/$OWNER/$name/contents/.github/workflows?ref=$br" --jq '[.[].name]|join(",")' 2>/dev/null || echo "-")
             files=$(gh api "repos/$OWNER/$name/contents?ref=$br" --jq '[.[].name]|join(",")' 2>/dev/null | cut -c1-300 || echo "-")
-            echo "AUDIT $name|$vis|$arch|$fork|$br|$pushed|$kb|$desc|$home|$topics|$p|$stars|wf=$wf|root=$files"
+            echo "AUDIT $name|$vis|$arch|$fork|$br|$pushed|$kb|$desc|$home|$topics|$p|$stars|wf=$wf|root=$files" | tee -a audit.txt
           done < repos.tsv
+          # Logs can't be read from Claude cloud sessions, so publish the report to the audit-report branch.
+          main_sha=$(gh api "repos/$OWNER/jamalxcode/git/ref/heads/main" --jq .object.sha)
+          gh api "repos/$OWNER/jamalxcode/git/ref/heads/audit-report" --silent 2>/dev/null \
+            || gh api "repos/$OWNER/jamalxcode/git/refs" -f ref=refs/heads/audit-report -f sha="$main_sha" --silent
+          old=$(gh api "repos/$OWNER/jamalxcode/contents/audit.txt?ref=audit-report" --jq .sha 2>/dev/null || true)
+          args=(-f message="Repo audit $(date -u +%F)" -f branch=audit-report -f content="$(base64 -w0 audit.txt)")
+          [ -n "$old" ] && args+=(-f sha="$old")
+          gh api -X PUT "repos/$OWNER/jamalxcode/contents/audit.txt" "${args[@]}" --jq '"report: " + .content.html_url'
 
       - name: Create repository
         if: inputs.task == 'create-repo' || inputs.task == 'site'
