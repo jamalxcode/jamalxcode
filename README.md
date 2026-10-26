@@ -52,6 +52,7 @@ My portal, where every project I build is announced and showcased first. If you 
 ### AI & Media
 | Project | Repo | Description |
 |---------|------|-------------|
+| [How](https://how.sala.company) | [repo](https://github.com/jamalxcode/how) | Type a thing and see how it works: one exploded view with numbered parts, photos and a 3D model, in 17 languages |
 | [WebAI](https://webai.sala.company) | [repo](https://github.com/jamalxcode/webllm-onefile) | Run a local AI model entirely in your browser, no data leaves your device |
 | [Scene to Story](https://story.sala.company) | [repo](https://github.com/jamalxcode/storywriter) | AI watches a one-minute clip and writes it up as prose, a poem or a screenplay |
 | [Radio](https://radio.sala.company) | [repo](https://github.com/jamalxcode/radio) | Web radio styled after a 10-band shortwave portable |
