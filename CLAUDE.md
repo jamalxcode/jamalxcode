@@ -6,7 +6,7 @@ This repo holds the GitHub profile README and the Repo admin workflow that manag
 
 Use the **github-autopilot** skill (`.claude/skills/github-autopilot/SKILL.md`). It covers the Repo admin workflow, the sala.company site pattern, deploy checks and commit identity. Don't repeat its contents here; update the skill instead.
 
-Start any cleanup or review with the `audit` task, then read the report from the `audit-report` branch (job logs can't be fetched from a cloud session).
+Start any cleanup or review with the `audit` task, then read the report from the **private** repo `jamalxcode/repo-audit` (`audit.txt` on main; attach it with `add_repo` and clone it, since job logs can't be fetched from a cloud session). The report names private repos and their files, so it must never be written to a branch of this public repo again.
 
 ## House rules
 

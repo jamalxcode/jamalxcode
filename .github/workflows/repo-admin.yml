@@ -31,6 +31,8 @@ on:
 permissions:
   contents: read
 
+# The audit report goes to the private repo jamalxcode/repo-audit, never to a branch of this public repo.
+
 concurrency:
   group: repo-admin-${{ inputs.repo }}
   cancel-in-progress: false
@@ -71,14 +73,20 @@ jobs:
             files=$(gh api "repos/$OWNER/$name/contents?ref=$br" --jq '[.[].name]|join(",")' 2>/dev/null | cut -c1-300 || echo "-")
             echo "AUDIT $name|$vis|$arch|$fork|$br|$pushed|$kb|$desc|$home|$topics|$p|$stars|wf=$wf|root=$files" | tee -a audit.txt
           done < repos.tsv
-          # Logs can't be read from Claude cloud sessions, so publish the report to the audit-report branch.
-          main_sha=$(gh api "repos/$OWNER/jamalxcode/git/ref/heads/main" --jq .object.sha)
-          gh api "repos/$OWNER/jamalxcode/git/ref/heads/audit-report" --silent 2>/dev/null \
-            || gh api "repos/$OWNER/jamalxcode/git/refs" -f ref=refs/heads/audit-report -f sha="$main_sha" --silent
-          old=$(gh api "repos/$OWNER/jamalxcode/contents/audit.txt?ref=audit-report" --jq .sha 2>/dev/null || true)
-          args=(-f message="Repo audit $(date -u +%F)" -f branch=audit-report -f content="$(base64 -w0 audit.txt)")
+          # Logs can't be read from Claude cloud sessions, so publish the report to the PRIVATE
+          # repo jamalxcode/repo-audit (created here if missing). It lists private repos and their
+          # files, so it must never land in this public repo again.
+          REPORT_REPO=repo-audit
+          gh api "repos/$OWNER/$REPORT_REPO" --silent 2>/dev/null \
+            || gh api user/repos -f name="$REPORT_REPO" -F private=true -F auto_init=true -f description="Private: repo audit reports written by the Repo admin workflow" --jq '"created " + .html_url'
+          [ "$(gh api "repos/$OWNER/$REPORT_REPO" --jq .private)" = "true" ] || { echo "::error::$REPORT_REPO is not private; refusing to publish the report"; exit 1; }
+          old=$(gh api "repos/$OWNER/$REPORT_REPO/contents/audit.txt" --jq .sha 2>/dev/null || true)
+          args=(-f message="Repo audit $(date -u +%F)" -f content="$(base64 -w0 audit.txt)")
           [ -n "$old" ] && args+=(-f sha="$old")
-          gh api -X PUT "repos/$OWNER/jamalxcode/contents/audit.txt" "${args[@]}" --jq '"report: " + .content.html_url'
+          gh api -X PUT "repos/$OWNER/$REPORT_REPO/contents/audit.txt" "${args[@]}" --jq '"report: " + .content.html_url'
+          # Remove the old public audit-report branch if it still exists (it once leaked this list).
+          gh api "repos/$OWNER/jamalxcode/git/ref/heads/audit-report" --silent 2>/dev/null \
+            && gh api -X DELETE "repos/$OWNER/jamalxcode/git/refs/heads/audit-report" && echo "deleted the public audit-report branch" || true
 
       - name: Create repository
         if: inputs.task == 'create-repo' || inputs.task == 'site'
