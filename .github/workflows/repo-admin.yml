@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       task:
-        description: audit (read-only report on every repo; repo input is ignored) | create-repo | pages | domain | site (= all three) | settings | reset-domain (remove and re-add the domain to retry a stuck HTTPS certificate) | disable-pages (unpublish the Pages site) | archive (make the repo read-only and archived) | remove-domain (detach the custom domain; the site serves from owner.github.io/repo)
+        description: audit (read-only report on every repo; repo input is ignored) | create-repo | pages | domain | site (= all three) | settings | reset-domain (remove and re-add the domain to retry a stuck HTTPS certificate) | disable-pages (unpublish the Pages site) | archive (make the repo read-only and archived) | remove-domain (detach the custom domain; the site serves from owner.github.io/repo) | make-public (change a private repo to public)
         required: true
         default: site
       repo:
@@ -54,7 +54,7 @@ jobs:
           [ -n "$GH_TOKEN" ] || { echo "::error::ADMIN_TOKEN secret is not set"; exit 1; }
           [[ "$REPO" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::bad repo name: $REPO"; exit 1; }
           [[ -z "$DOMAIN" || "$DOMAIN" =~ ^[A-Za-z0-9.-]+$ ]] || { echo "::error::bad domain: $DOMAIN"; exit 1; }
-          case "$TASK" in audit|create-repo|pages|domain|site|settings|reset-domain|remove-domain|disable-pages|archive) ;; *) echo "::error::unknown task: $TASK"; exit 1;; esac
+          case "$TASK" in audit|create-repo|pages|domain|site|settings|reset-domain|remove-domain|disable-pages|archive|make-public) ;; *) echo "::error::unknown task: $TASK"; exit 1;; esac
           gh api user --jq '"token belongs to " + .login'
 
       - name: Audit all repositories (read-only)
@@ -144,6 +144,11 @@ jobs:
           else
             echo "$REPO has no Pages site"
           fi
+
+      - name: Make repository public (make-public)
+        if: inputs.task == 'make-public'
+        run: |
+          gh api -X PATCH "repos/$OWNER/$REPO" -F private=false --jq '"\(.full_name) private=\(.private)"'
 
       - name: Archive repository (archive)
         if: inputs.task == 'archive'
