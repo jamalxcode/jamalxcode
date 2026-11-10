@@ -4,14 +4,15 @@
 #
 # ADMIN_TOKEN: fine-grained personal access token, resource owner jamalxcode,
 # "All repositories", permissions Administration, Contents, Pages and Workflows
-# set to read and write.
+# set to read and write, and Actions set to read (the release task downloads a
+# run's build files).
 name: Repo admin
 
 on:
   workflow_dispatch:
     inputs:
       task:
-        description: audit (read-only report on every repo; repo input is ignored) | create-repo | pages | domain | site (= all three) | settings | reset-domain (remove and re-add the domain to retry a stuck HTTPS certificate) | disable-pages (unpublish the Pages site) | archive (make the repo read-only and archived) | remove-domain (detach the custom domain; the site serves from owner.github.io/repo) | make-public (change a private repo to public) | make-private (change a public repo to private)
+        description: audit (read-only report on every repo; repo input is ignored) | create-repo | pages | domain | site (= all three) | settings | reset-domain (remove and re-add the domain to retry a stuck HTTPS certificate) | disable-pages (unpublish the Pages site) | archive (make the repo read-only and archived) | remove-domain (detach the custom domain; the site serves from owner.github.io/repo) | make-public (change a private repo to public) | make-private (change a public repo to private) | actions-check (read the repo's Actions token permissions; report in jamalxcode/repo-audit) | actions-allow-write (let workflow tokens write; fixes "Resource not accessible by integration" when a workflow publishes a release) | release (publish a release from a finished run's build files, given run_id and version)
         required: true
         default: site
       repo:
@@ -26,6 +27,12 @@ on:
         default: 'false'
       description:
         description: Repo description (optional, any task)
+        required: false
+      run_id:
+        description: Workflow run whose build files to publish (release)
+        required: false
+      version:
+        description: Version to publish, e.g. 3.3.0 or 3.3.0-beta.1 (a "-" makes it a prerelease) (release)
         required: false
 
 permissions:
@@ -48,13 +55,17 @@ jobs:
       DOMAIN: ${{ inputs.domain }}
       PRIVATE: ${{ inputs.private }}
       DESCRIPTION: ${{ inputs.description }}
+      RUN_ID: ${{ inputs.run_id }}
+      VERSION: ${{ inputs.version }}
     steps:
       - name: Check inputs and token
         run: |
           [ -n "$GH_TOKEN" ] || { echo "::error::ADMIN_TOKEN secret is not set"; exit 1; }
           [[ "$REPO" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::bad repo name: $REPO"; exit 1; }
           [[ -z "$DOMAIN" || "$DOMAIN" =~ ^[A-Za-z0-9.-]+$ ]] || { echo "::error::bad domain: $DOMAIN"; exit 1; }
-          case "$TASK" in audit|create-repo|pages|domain|site|settings|reset-domain|remove-domain|disable-pages|archive|make-public|make-private) ;; *) echo "::error::unknown task: $TASK"; exit 1;; esac
+          [[ -z "$RUN_ID" || "$RUN_ID" =~ ^[0-9]+$ ]] || { echo "::error::bad run_id: $RUN_ID"; exit 1; }
+          [[ -z "$VERSION" || "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.]+)?$ ]] || { echo "::error::bad version: $VERSION"; exit 1; }
+          case "$TASK" in audit|create-repo|pages|domain|site|settings|reset-domain|remove-domain|disable-pages|archive|make-public|make-private|actions-check|actions-allow-write|release) ;; *) echo "::error::unknown task: $TASK"; exit 1;; esac
           gh api user --jq '"token belongs to " + .login'
 
       - name: Audit all repositories (read-only)
@@ -159,6 +170,58 @@ jobs:
         if: inputs.task == 'archive'
         run: |
           gh api -X PATCH "repos/$OWNER/$REPO" -F archived=true --jq '"\(.full_name) archived=\(.archived)"'
+
+      - name: Actions token permissions (actions-check, actions-allow-write)
+        if: inputs.task == 'actions-check' || inputs.task == 'actions-allow-write'
+        run: |
+          if [ "$TASK" = actions-allow-write ]; then
+            gh api -X PUT "repos/$OWNER/$REPO/actions/permissions/workflow" -f default_workflow_permissions=write --silent
+            echo "workflow tokens in $REPO may now write"
+          fi
+          {
+            echo "Actions check for $OWNER/$REPO ($(date -u '+%F %H:%M') UTC)"
+            gh api "repos/$OWNER/$REPO/actions/permissions" --jq '"actions enabled=\(.enabled) allowed_actions=\(.allowed_actions // "-")"'
+            gh api "repos/$OWNER/$REPO/actions/permissions/workflow" --jq '"workflow token default=\(.default_workflow_permissions) can_approve_prs=\(.can_approve_pull_request_reviews)"'
+            echo "rulesets:"; gh api "repos/$OWNER/$REPO/rulesets" --jq '.[] | "  \(.name) target=\(.target) enforcement=\(.enforcement)"' 2>/dev/null || echo "  (none or not readable)"
+            echo "latest release:"; gh api "repos/$OWNER/$REPO/releases/latest" --jq '"  \(.tag_name) \(.published_at)"' 2>/dev/null || echo "  (none)"
+          } | tee check.txt
+          # Same private report repo as the audit (session can't read job logs).
+          old=$(gh api "repos/$OWNER/repo-audit/contents/actions-$REPO.txt" --jq .sha 2>/dev/null || true)
+          args=(-f message="Actions check $REPO" -f content="$(base64 -w0 check.txt)")
+          [ -n "$old" ] && args+=(-f sha="$old")
+          gh api -X PUT "repos/$OWNER/repo-audit/contents/actions-$REPO.txt" "${args[@]}" --jq '"report: " + .content.html_url' || true
+
+      - name: Publish a release from a run's build files (release)
+        if: inputs.task == 'release'
+        run: |
+          [ -n "$RUN_ID" ] && [ -n "$VERSION" ] || { echo "::error::release needs run_id and version"; exit 1; }
+          TAG="v$VERSION"
+          if gh api "repos/$OWNER/$REPO/releases/tags/$TAG" --silent 2>/dev/null; then
+            echo "$TAG is already published"; exit 0
+          fi
+          read -r SHA CONCLUSION < <(gh api "repos/$OWNER/$REPO/actions/runs/$RUN_ID" --jq '"\(.head_sha) \(.conclusion)"')
+          echo "run $RUN_ID: commit $SHA, conclusion $CONCLUSION"
+          # Every job must have passed; the only failure allowed is the publish step itself.
+          bad=$(gh api "repos/$OWNER/$REPO/actions/runs/$RUN_ID/jobs?filter=latest" --jq '[.jobs[] | select(.name != "publish") | select(.conclusion != "success") | select(([.steps[] | select(.conclusion == "failure") | .name]) != ["Publish release"]) | .name] | join(", ")')
+          [ -z "$bad" ] || { echo "::error::run $RUN_ID didn't pass ($bad); not publishing"; exit 1; }
+          # Only the build files of that run, which already passed its tests and
+          # carry its Sigstore proof. Nothing is rebuilt here.
+          mkdir files && cd files
+          gh run download "$RUN_ID" -R "$OWNER/$REPO" -p "$REPO-$VERSION" \
+            || { echo "::error::couldn't download the build files of run $RUN_ID named $REPO-$VERSION (does ADMIN_TOKEN have Actions: read?)"; exit 1; }
+          find . -mindepth 2 -type f -exec mv {} . \; ; find . -mindepth 1 -type d -empty -delete
+          ls -la
+          [ -n "$(ls ./*.zip 2>/dev/null)" ] || { echo "::error::no build files in that run"; exit 1; }
+          # Notes: that version's CHANGELOG section plus the repo's release notes, as its workflow does.
+          gh api "repos/$OWNER/$REPO/contents/CHANGELOG.md?ref=$SHA" --jq .content | base64 -d > CHANGELOG.md 2>/dev/null || true
+          gh api "repos/$OWNER/$REPO/contents/.github/release-notes.md?ref=$SHA" --jq .content | base64 -d > extra.md 2>/dev/null || true
+          section() { awk -v v="## $1" '$0==v{on=1;next} /^## /{on=0} on' CHANGELOG.md 2>/dev/null; }
+          NOTES=$(section "$VERSION"); [[ -n "${NOTES//[[:space:]]/}" ]] || NOTES=$(section "${VERSION%%-*}")
+          { echo "## What's new"; echo; echo "$NOTES"; echo; cat extra.md 2>/dev/null; } > ../notes.md
+          rm -f CHANGELOG.md extra.md
+          PRE=""; [[ "$VERSION" == *-* ]] && PRE="--prerelease"
+          gh release create "$TAG" ./* -R "$OWNER/$REPO" --target "$SHA" --title "$REPO $TAG" --notes-file ../notes.md $PRE
+          gh api "repos/$OWNER/$REPO/releases/tags/$TAG" --jq '"published " + .html_url + " (" + ([.assets[].name]|join(", ")) + ")"'
 
       - name: Set description and homepage
         if: inputs.description != '' || inputs.domain != ''

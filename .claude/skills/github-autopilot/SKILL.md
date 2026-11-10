@@ -22,6 +22,8 @@ only ask the user for something on the "truly manual" list at the bottom.
 | `configure-pages` with `enablement: true` | **no** | GITHUB_TOKEN can't create a Pages site. Use the Repo admin workflow. |
 | Fetch *.github.io, *.sala.company, dns.google | blocked by the network policy | Check deployment statuses instead (see Verify). |
 | GitHub archive zips (`/archive/*.zip`) | 403 | `git clone --depth 1 -b <tag>` instead; release assets via `curl -L` work. |
+| Push a tag / create a release | **no** directly | The proxy drops tag pushes and the GitHub tools can't create releases. Use Repo admin `release`. |
+| A workflow's own release step fails with 403 "Resource not accessible by integration" | fix it | Repo admin `actions-check` (see why), then `actions-allow-write`, then **start a new run** (re-running a failed job didn't pick up the change on 2026-11-10) or publish the finished run's files with `release`. Don't just retry. |
 
 ## The Repo admin workflow (does the "settings page" stuff)
 
@@ -35,7 +37,7 @@ only ask the user for something on the "truly manual" list at the bottom.
      ref:"main", workflow_id:"repo-admin.yml",
      inputs:{task:"site", repo:"<name>", domain:"<name>.sala.company", private:"false", description:"..."}}
    ```
-   Tasks: `create-repo`, `pages` (source = GitHub Actions, plus the domain if given), `domain`, `site` (all three), `settings` (description and homepage only), `reset-domain`, `remove-domain`, `disable-pages`, `archive` (run `disable-pages` first: archived repos are read-only), and `audit` (read-only report on every repo, written to `audit.txt` in the PRIVATE repo `jamalxcode/repo-audit`; job logs are blocked here, so `add_repo` that repo and clone it to read it; never publish the report to a branch of the public profile repo, it lists private repos and their files).
+   Tasks: `create-repo`, `pages` (source = GitHub Actions, plus the domain if given), `domain`, `site` (all three), `settings` (description and homepage only), `reset-domain`, `remove-domain`, `disable-pages`, `archive` (run `disable-pages` first: archived repos are read-only), `actions-check` (the repo's workflow-token permissions, rulesets and latest release, written to `actions-<repo>.txt` in `jamalxcode/repo-audit`), `actions-allow-write` (sets workflow tokens to read and write, then reports the same), `release` (inputs `run_id` and `version`: publishes the build files of that finished run, from its artifact named `<repo>-<version>`, as release `v<version>` on the run's commit, with that version's CHANGELOG section plus `.github/release-notes.md` as notes; a `-` in the version makes it a prerelease; it refuses if any job of the run failed other than its own "Publish release" step, and nothing is rebuilt, so the run's Sigstore proof still matches), and `audit` (read-only report on every repo, written to `audit.txt` in the PRIVATE repo `jamalxcode/repo-audit`; job logs are blocked here, so `add_repo` that repo and clone it to read it; never publish the report to a branch of the public profile repo, it lists private repos and their files).
 3. Wait for it: `gh api "repos/jamalxcode/jamalxcode/actions/runs?per_page=1" --jq '.workflow_runs[0]|"\(.status) \(.conclusion)"'`. Read the logs with `get_job_logs` if it fails.
 4. For a new repo, now `add_repo` it with push access, clone it, and push.
 
@@ -85,7 +87,7 @@ D=$(gh api repos/jamalxcode/<r>/deployments --jq '.[0].id'); gh api repos/jamalx
 
 ## Truly manual (ask only for these, as short numbered browser steps)
 
-1. **One time only, the ADMIN_TOKEN.** Create it at github.com → Settings → Developer settings → Fine-grained tokens → Generate. Resource owner: jamalxcode. Repository access: All repositories. Permissions: Administration, Contents, Pages and Workflows read and write. Then save it at github.com/jamalxcode/jamalxcode → Settings → Secrets and variables → Actions → New repository secret, name `ADMIN_TOKEN`. Again only when it expires.
+1. **One time only, the ADMIN_TOKEN.** Create it at github.com → Settings → Developer settings → Fine-grained tokens → Generate. Resource owner: jamalxcode. Repository access: All repositories. Permissions: Administration, Contents, Pages and Workflows read and write, plus Actions read (for `release`). Then save it at github.com/jamalxcode/jamalxcode → Settings → Secrets and variables → Actions → New repository secret, name `ADMIN_TOKEN`. Again only when it expires.
 2. **DNS** for a new subdomain, unless a wildcard exists: CNAME `<name>` → `jamalxcode.github.io` at the sala.company DNS provider. A one-time `*.sala.company` wildcard CNAME removes this step. If you suggest the wildcard, also suggest verifying sala.company under GitHub → Settings → Pages → Verified domains, which blocks subdomain takeover.
 3. GitHub account connection problems (`add_repo` says the app isn't installed or connected) → https://claude.ai/connect-github.
 
