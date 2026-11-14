@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       task:
-        description: audit (read-only report on every repo; repo input is ignored) | create-repo | pages | domain | site (= all three) | settings | reset-domain (remove and re-add the domain to retry a stuck HTTPS certificate) | disable-pages (unpublish the Pages site) | archive (make the repo read-only and archived) | remove-domain (detach the custom domain; the site serves from owner.github.io/repo) | make-public (change a private repo to public) | make-private (change a public repo to private) | actions-check (read the repo's Actions token permissions; report in jamalxcode/repo-audit) | actions-allow-write (let workflow tokens write; fixes "Resource not accessible by integration" when a workflow publishes a release) | release (publish a release from a finished run's build files, given run_id and version) | deploy-key (add an SSH public key that can reach only this repo, read-only unless key_writable) | access-lock (only the owner can change the repo — remove collaborators and invitations, writable deploy keys; read-only workflow tokens; outside pull requests need approval to run; main can't be force-pushed or deleted; report in jamalxcode/repo-audit)
+        description: audit (read-only report on every repo; repo input is ignored) | create-repo | pages | domain | site (= all three) | settings | reset-domain (remove and re-add the domain to retry a stuck HTTPS certificate) | disable-pages (unpublish the Pages site) | archive (make the repo read-only and archived) | remove-domain (detach the custom domain; the site serves from owner.github.io/repo) | make-public (change a private repo to public) | make-private (change a public repo to private) | actions-check (read the repo's Actions token permissions; report in jamalxcode/repo-audit) | actions-allow-write (let workflow tokens write; fixes "Resource not accessible by integration" when a workflow publishes a release) | release (publish a release from a finished run's build files, given run_id and version) | deploy-key (add an SSH public key that can reach only this repo, read-only unless key_writable) | remove-deploy-key (delete the repo's deploy keys with the title given in key) | access-lock (only the owner can change the repo — remove collaborators and invitations, writable deploy keys; read-only workflow tokens; outside pull requests need approval to run; main can't be force-pushed or deleted; report in jamalxcode/repo-audit)
         required: true
         default: site
       repo:
@@ -35,7 +35,7 @@ on:
         description: Version to publish, e.g. 3.3.0 or 3.3.0-beta.1 (a "-" makes it a prerelease) (release)
         required: false
       key:
-        description: SSH public key, e.g. "ssh-ed25519 AAAA… title" (deploy-key; the title replaces an older key of that title)
+        description: SSH public key, e.g. "ssh-ed25519 AAAA… title" (deploy-key; the title replaces an older key of that title), or just the title (remove-deploy-key)
         required: false
       key_writable:
         description: Let the key push (deploy-key)
@@ -74,7 +74,7 @@ jobs:
           [[ -z "$DOMAIN" || "$DOMAIN" =~ ^[A-Za-z0-9.-]+$ ]] || { echo "::error::bad domain: $DOMAIN"; exit 1; }
           [[ -z "$RUN_ID" || "$RUN_ID" =~ ^[0-9]+$ ]] || { echo "::error::bad run_id: $RUN_ID"; exit 1; }
           [[ -z "$VERSION" || "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.]+)?$ ]] || { echo "::error::bad version: $VERSION"; exit 1; }
-          case "$TASK" in audit|create-repo|pages|domain|site|settings|reset-domain|remove-domain|disable-pages|archive|make-public|make-private|actions-check|actions-allow-write|release|deploy-key|access-lock) ;; *) echo "::error::unknown task: $TASK"; exit 1;; esac
+          case "$TASK" in audit|create-repo|pages|domain|site|settings|reset-domain|remove-domain|disable-pages|archive|make-public|make-private|actions-check|actions-allow-write|release|deploy-key|remove-deploy-key|access-lock) ;; *) echo "::error::unknown task: $TASK"; exit 1;; esac
           gh api user --jq '"token belongs to " + .login'
 
       - name: Audit all repositories (read-only)
@@ -185,6 +185,16 @@ jobs:
           done
           ro=true; [ "$KEY_WRITABLE" = true ] && ro=false
           gh api -X POST "repos/$OWNER/$REPO/keys" -f title="$title" -f key="${KEY% *}" -F read_only=$ro --jq '"added deploy key \(.title) read_only=\(.read_only)"'
+
+      - name: Remove a deploy key (remove-deploy-key)
+        if: inputs.task == 'remove-deploy-key'
+        run: |
+          [[ "$KEY" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::key must be the deploy key's title"; exit 1; }
+          n=0
+          for id in $(gh api "repos/$OWNER/$REPO/keys" --jq ".[] | select(.title == \"$KEY\") | .id"); do
+            gh api -X DELETE "repos/$OWNER/$REPO/keys/$id" --silent && echo "removed deploy key $KEY" && n=$((n+1))
+          done
+          [ "$n" -gt 0 ] || echo "no deploy key titled $KEY"
 
       - name: Only the owner can change the repo (access-lock)
         if: inputs.task == 'access-lock'
